@@ -408,7 +408,7 @@ export const AdminDashboard = () => {
         open={isCategoryModalOpen}
         onCancel={() => setIsCategoryModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={categoryForm} layout="vertical" onFinish={handleSaveCategory} className="mt-4">
           <Form.Item
