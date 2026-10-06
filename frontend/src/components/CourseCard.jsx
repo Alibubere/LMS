@@ -65,7 +65,7 @@ export const CourseCard = ({
         </div>
       }
       className="flex flex-col h-full rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-shadow border-gray-200"
-      bodyStyle={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
+      styles={{ body: { padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 } }}
     >
       <div className="flex-1">
         <h3 className="font-bold text-base text-gray-900 line-clamp-1 hover:text-blue-600 transition mb-1">

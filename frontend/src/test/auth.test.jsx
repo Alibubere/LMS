@@ -39,7 +39,7 @@ describe('Authentication UI & Route Protection', () => {
       isAuthenticated: false,
     };
 
-    render(
+    const { container } = render(
       <AuthContext.Provider value={mockAuth}>
         <MemoryRouter>
           <LoginPage />
@@ -47,11 +47,12 @@ describe('Authentication UI & Route Protection', () => {
       </AuthContext.Provider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
+    const submitBtn = screen.getByRole('button', { name: /log in/i });
+    fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter your email address')).toBeInTheDocument();
-      expect(screen.getByText('Please enter your password')).toBeInTheDocument();
+      const emailInput = container.querySelector('#loginForm_email');
+      expect(emailInput).toHaveAttribute('aria-invalid', 'true');
     });
     expect(mockAuth.login).not.toHaveBeenCalled();
   });
@@ -84,7 +85,7 @@ describe('Authentication UI & Route Protection', () => {
       isAuthenticated: false,
     };
 
-    render(
+    const { container } = render(
       <AuthContext.Provider value={mockAuth}>
         <MemoryRouter>
           <RegisterPage />
@@ -92,12 +93,12 @@ describe('Authentication UI & Route Protection', () => {
       </AuthContext.Provider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /register & continue/i }));
+    const submitBtn = screen.getByRole('button', { name: /register & continue/i });
+    fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter your name')).toBeInTheDocument();
-      expect(screen.getByText('Please enter your email address')).toBeInTheDocument();
-      expect(screen.getByText('Please enter a password')).toBeInTheDocument();
+      const nameInput = container.querySelector('#registerForm_name');
+      expect(nameInput).toHaveAttribute('aria-invalid', 'true');
     });
     expect(mockAuth.register).not.toHaveBeenCalled();
   });

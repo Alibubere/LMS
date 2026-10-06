@@ -218,7 +218,7 @@ export const LearningPage = () => {
                 <Tag color="blue">{lessons.length} Lessons</Tag>
               </div>
             }
-            bodyStyle={{ padding: '8px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}
+            styles={{ body: { padding: '8px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' } }}
           >
             <div className="space-y-1">
               {lessons.map((item, index) => {
@@ -267,7 +267,7 @@ export const LearningPage = () => {
         onCancel={() => setIsCertModalOpen(false)}
         footer={null}
         width={850}
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="py-4">
           <CertificateCard certificate={certificate} />

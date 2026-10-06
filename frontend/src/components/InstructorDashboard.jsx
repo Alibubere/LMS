@@ -664,7 +664,7 @@ export const InstructorDashboard = () => {
         open={isCourseModalOpen}
         onCancel={() => setIsCourseModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={courseForm} layout="vertical" onFinish={handleSaveCourse} className="mt-4">
           <Form.Item
@@ -724,7 +724,7 @@ export const InstructorDashboard = () => {
         open={isLessonModalOpen}
         onCancel={() => setIsLessonModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={lessonForm} layout="vertical" onFinish={handleSaveLesson} className="mt-4">
           <Form.Item
@@ -776,7 +776,7 @@ export const InstructorDashboard = () => {
         onCancel={() => setIsQuizModalOpen(false)}
         footer={null}
         width={700}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={quizForm} layout="vertical" onFinish={handleSaveQuiz} className="mt-4">
           <Form.Item

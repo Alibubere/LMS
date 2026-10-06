@@ -20,7 +20,7 @@ export const AppShell = ({ children, showSidebar = true }) => {
           placement="left"
           onClose={() => setMobileDrawerOpen(false)}
           open={mobileDrawerOpen}
-          bodyStyle={{ padding: 0 }}
+          styles={{ body: { padding: 0 } }}
           width={280}
         >
           <Sidebar onClose={() => setMobileDrawerOpen(false)} />
