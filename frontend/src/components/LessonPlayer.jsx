@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Tag, Card, message } from 'antd';
+import { Button, message } from 'antd';
 import {
   CheckCircleOutlined,
   LeftOutlined,
@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import { progressApi } from '../api';
 import { formatDuration } from '../utils/formatters';
+import { Badge } from './ui';
 
 export const LessonPlayer = ({
   lesson,
@@ -23,9 +24,13 @@ export const LessonPlayer = ({
 
   if (!lesson) {
     return (
-      <Card className="rounded-xl p-8 text-center text-gray-500 border-dashed">
-        Please select a lesson from the curriculum to begin learning.
-      </Card>
+      <div className="card">
+        <div className="card-pad-lg text-center">
+          <p className="text-body-md text-body">
+            Please select a lesson from the curriculum to begin learning.
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -57,7 +62,11 @@ export const LessonPlayer = ({
   };
 
   const isVideo = Boolean(
-    contentUrl && (contentUrl.includes('youtube') || contentUrl.includes('youtu.be') || contentUrl.includes('vimeo') || contentUrl.endsWith('.mp4'))
+    contentUrl &&
+      (contentUrl.includes('youtube') ||
+        contentUrl.includes('youtu.be') ||
+        contentUrl.includes('vimeo') ||
+        contentUrl.endsWith('.mp4'))
   );
 
   const getEmbedUrl = (url) => {
@@ -74,94 +83,90 @@ export const LessonPlayer = ({
 
   return (
     <div className="space-y-6">
-      {/* Content Viewer / Video Player */}
-      <div className="bg-black rounded-2xl overflow-hidden shadow-md aspect-video max-h-[520px] flex items-center justify-center">
+      {/* Content viewer / video player */}
+      <div className="band-dark flex aspect-video max-h-[520px] w-full items-center justify-center overflow-hidden rounded-sm border border-hairline-dark">
         {isVideo ? (
           contentUrl.endsWith('.mp4') ? (
-            <video controls className="w-full h-full object-contain" src={contentUrl} />
+            <video controls className="h-full w-full object-contain" src={contentUrl} />
           ) : (
             <iframe
               src={getEmbedUrl(contentUrl)}
               title={title}
-              className="w-full h-full border-0"
+              className="h-full w-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           )
         ) : contentUrl ? (
-          <div className="p-8 text-center text-white space-y-4">
-            <VideoCameraOutlined className="text-4xl text-blue-400" />
-            <p className="text-sm text-gray-300">External Resource Available</p>
-            <a
+          <div className="space-y-4 p-8 text-center">
+            <VideoCameraOutlined className="text-3xl text-accent-periwinkle" />
+            <p className="text-body-md text-body">External Resource Available</p>
+            <Button
               href={contentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+              className="btn-white"
             >
               Open External Content
-            </a>
+            </Button>
           </div>
         ) : (
-          <div className="p-8 text-center text-slate-400 space-y-2">
-            <FileTextOutlined className="text-4xl text-slate-500" />
-            <p className="text-sm">Reading lesson material below</p>
+          <div className="space-y-3 p-8 text-center">
+            <FileTextOutlined className="text-3xl text-body" />
+            <p className="text-body-md text-body">Reading lesson material below</p>
           </div>
         )}
       </div>
 
-      {/* Lesson Controls & Header */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{title}</h2>
-              {completed && (
-                <Tag color="success" icon={<CheckCircleOutlined />}>
-                  Completed
-                </Tag>
-              )}
+      {/* Lesson header + content + navigation */}
+      <div className="card">
+        <div className="card-pad">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="eyebrow">Lesson</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <h2 className="text-display-md text-ink">{title}</h2>
+                {completed && (
+                  <Badge variant="success" icon={<CheckCircleOutlined />}>
+                    Completed
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-2 text-caption text-body">
+                Estimated duration: {formatDuration(durationMinutes)}
+              </p>
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              Estimated duration: {formatDuration(durationMinutes)}
+
+            <div className="shrink-0">
+              <Button
+                type={completed ? 'default' : 'primary'}
+                icon={<CheckCircleOutlined />}
+                loading={marking}
+                onClick={handleMarkComplete}
+              >
+                {completed ? 'Marked as Complete' : 'Mark Lesson Complete'}
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Button
-              type={completed ? 'default' : 'primary'}
-              icon={<CheckCircleOutlined />}
-              loading={marking}
-              onClick={handleMarkComplete}
-              className={!completed ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-            >
-              {completed ? 'Marked as Complete' : 'Mark Lesson Complete'}
-            </Button>
-          </div>
+          {description && (
+            <p className="mt-5 border-t border-hairline pt-5 text-body-md text-body">
+              {description}
+            </p>
+          )}
+
+          {contentText && (
+            <div className="mt-5 border-t border-hairline pt-5">
+              <p className="eyebrow">Lesson notes</p>
+              <div className="mt-3 whitespace-pre-line text-body-md leading-relaxed text-ink">
+                {contentText}
+              </div>
+            </div>
+          )}
         </div>
 
-        {description && (
-          <p className="text-gray-600 text-sm border-t border-gray-100 pt-3">
-            {description}
-          </p>
-        )}
-
-        {/* Written content */}
-        {contentText && (
-          <div className="border-t border-gray-100 pt-4">
-            <h4 className="text-sm font-semibold text-gray-800 mb-2">Lesson Notes</h4>
-            <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-line leading-relaxed">
-              {contentText}
-            </div>
-          </div>
-        )}
-
-        {/* Previous / Next buttons */}
-        <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
-          <Button
-            icon={<LeftOutlined />}
-            disabled={!hasPrev}
-            onClick={onPrevLesson}
-          >
+        <div className="flex items-center justify-between gap-3 border-t border-hairline px-6 py-5">
+          <Button icon={<LeftOutlined />} disabled={!hasPrev} onClick={onPrevLesson}>
             Previous Lesson
           </Button>
           <Button
@@ -169,7 +174,6 @@ export const LessonPlayer = ({
             icon={<RightOutlined />}
             disabled={!hasNext}
             onClick={onNextLesson}
-            className="bg-blue-600 hover:bg-blue-700"
           >
             Next Lesson
           </Button>

@@ -3,7 +3,6 @@ import {
   Card,
   Table,
   Button,
-  Tag,
   Modal,
   Form,
   Input,
@@ -15,17 +14,13 @@ import {
   Space,
   Row,
   Col,
-  Statistic,
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  BookOutlined,
   FileTextOutlined,
   QuestionCircleOutlined,
-  TeamOutlined,
-  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { courseApi, lessonApi, quizApi, categoryApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
@@ -33,6 +28,7 @@ import { COURSE_STATUS } from '../utils/constants';
 import LoadingState from './common/LoadingState';
 import ErrorState from './common/ErrorState';
 import EmptyState from './common/EmptyState';
+import { StatTile, Badge, SectionHeader } from './ui';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -323,8 +319,10 @@ export const InstructorDashboard = () => {
       key: 'title',
       render: (text, record) => (
         <div>
-          <span className="font-bold text-gray-900 block">{text}</span>
-          <span className="text-xs text-gray-400">{record.categoryName || 'General'}</span>
+          <span className="block font-semibold text-ink">{text}</span>
+          <span className="text-caption text-body">
+            {record.categoryName || 'General'}
+          </span>
         </div>
       ),
     },
@@ -333,7 +331,9 @@ export const InstructorDashboard = () => {
       dataIndex: 'status',
       key: 'status',
       render: (st) => (
-        <Tag color={st === COURSE_STATUS.PUBLISHED ? 'success' : 'default'}>{st}</Tag>
+        <Badge variant={st === COURSE_STATUS.PUBLISHED ? 'success' : 'neutral'}>
+          {st}
+        </Badge>
       ),
     },
     {
@@ -357,7 +357,6 @@ export const InstructorDashboard = () => {
             size="small"
             type={selectedCourse?.id === record.id ? 'primary' : 'default'}
             onClick={() => handleSelectCourse(record)}
-            className={selectedCourse?.id === record.id ? 'bg-blue-600' : ''}
           >
             Manage Content
           </Button>
@@ -382,102 +381,72 @@ export const InstructorDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 sm:p-10 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <span className="text-xs uppercase font-extrabold tracking-widest text-amber-200">
-            Instructor Studio
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
-            Course Management & Curriculum
-          </h1>
-          <p className="text-amber-100 text-sm mt-1">
-            Author courses, publish lessons, create quizzes, and monitor learner submissions.
-          </p>
+      {/* Header band */}
+      <div className="band band-dark bleed -mt-6 md:-mt-10">
+        <div className="container-app flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between md:py-14">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Instructor studio</p>
+            <h1 className="mt-4 text-display-xl text-on-dark">
+              Course Management &amp; Curriculum
+            </h1>
+            <p className="lead mt-4">
+              Author courses, publish lessons, create quizzes, and monitor learner submissions.
+            </p>
+          </div>
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            onClick={() => handleOpenCourseModal()}
+            className="btn-mint shrink-0"
+          >
+            Create Course
+          </Button>
         </div>
-        <Button
-          type="primary"
-          size="large"
-          icon={<PlusOutlined />}
-          onClick={() => handleOpenCourseModal()}
-          className="bg-white text-orange-600 hover:bg-amber-50 font-bold border-0 shadow-sm"
-        >
-          Create Course
-        </Button>
       </div>
 
       {/* Metrics */}
-      <Row gutter={[16, 16]}>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">My Courses</span>}
-              value={courses.length}
-              prefix={<BookOutlined className="text-orange-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Total Enrolled</span>}
-              value={totalStudents}
-              prefix={<TeamOutlined className="text-blue-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Total Lessons</span>}
-              value={totalCourseLessons}
-              prefix={<FileTextOutlined className="text-emerald-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Course Categories</span>}
-              value={categories.length}
-              prefix={<CheckCircleOutlined className="text-purple-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile value={courses.length} label="My Courses" tone="mint" />
+        <StatTile value={totalStudents} label="Total Enrolled" tone="periwinkle" />
+        <StatTile value={totalCourseLessons} label="Total Lessons" tone="mint" />
+        <StatTile value={categories.length} label="Course Categories" tone="periwinkle" />
+      </div>
 
       {/* Courses List Table */}
-      <Card
-        className="rounded-2xl border-gray-200 shadow-xs"
-        title={<span className="font-bold text-gray-900">Courses Directory</span>}
-      >
-        <Table
-          columns={courseColumns}
-          dataSource={courses}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-          scroll={{ x: 600 }}
-        />
-      </Card>
+      <div className="card">
+        <div className="card-pad-lg">
+          <SectionHeader
+            eyebrow="Catalog"
+            title="Courses Directory"
+            description={`${courses.length} course${courses.length === 1 ? '' : 's'} in your workspace`}
+            className="mb-6"
+          />
+          <div className="table-shell">
+            <Table
+              columns={courseColumns}
+              dataSource={courses}
+              rowKey="id"
+              pagination={{ pageSize: 5 }}
+              scroll={{ x: 600 }}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Selected Course Content Manager */}
       {selectedCourse && (
-        <Card
-          className="rounded-2xl border-blue-200 bg-blue-50/20 shadow-xs"
-          title={
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="card">
+          <div className="card-pad-lg">
+            <div className="mb-6 flex flex-col gap-4 border-b border-hairline pb-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <span className="text-xs uppercase text-blue-600 font-bold block">
-                  Active Course Curriculum
-                </span>
-                <span className="text-lg font-extrabold text-gray-900">
-                  {selectedCourse.title}
-                </span>
+                <p className="eyebrow">Active course curriculum</p>
+                <h2 className="mt-3 text-display-md text-ink">{selectedCourse.title}</h2>
               </div>
-              <Tag color="blue">{selectedCourse.categoryName || 'General'}</Tag>
+              <Badge variant="outline">
+                {selectedCourse.categoryName || 'General'}
+              </Badge>
             </div>
-          }
-        >
           {detailLoading ? (
             <LoadingState tip="Loading course content..." />
           ) : (
@@ -498,7 +467,7 @@ export const InstructorDashboard = () => {
                           type="primary"
                           icon={<PlusOutlined />}
                           onClick={() => handleOpenLessonModal()}
-                          className="bg-blue-600"
+                          
                         >
                           Add Lesson
                         </Button>
@@ -519,7 +488,7 @@ export const InstructorDashboard = () => {
                             title: 'Lesson Title',
                             dataIndex: 'title',
                             key: 'title',
-                            render: (t) => <strong className="text-gray-900">{t}</strong>,
+                            render: (t) => <strong className="font-semibold text-ink">{t}</strong>,
                           },
                           {
                             title: 'Duration',
@@ -537,12 +506,12 @@ export const InstructorDashboard = () => {
                                   href={u}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-xs text-blue-600 truncate max-w-xs block"
+                                  className="text-caption text-ink underline underline-offset-4 truncate max-w-xs block"
                                 >
                                   {u}
                                 </a>
                               ) : (
-                                <span className="text-xs text-gray-400">Written text</span>
+                                <span className="text-caption text-body">Written text</span>
                               ),
                           },
                           {
@@ -585,7 +554,7 @@ export const InstructorDashboard = () => {
                           type="primary"
                           icon={<PlusOutlined />}
                           onClick={() => handleOpenQuizModal()}
-                          className="bg-indigo-600"
+                          
                         >
                           Create Assessment
                         </Button>
@@ -600,7 +569,7 @@ export const InstructorDashboard = () => {
                             title: 'Quiz Title',
                             dataIndex: 'title',
                             key: 'title',
-                            render: (t) => <strong className="text-gray-900">{t}</strong>,
+                            render: (t) => <strong className="font-semibold text-ink">{t}</strong>,
                           },
                           {
                             title: 'Passing Score',
@@ -655,7 +624,8 @@ export const InstructorDashboard = () => {
               ]}
             />
           )}
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Course Modal */}
@@ -711,7 +681,7 @@ export const InstructorDashboard = () => {
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={() => setIsCourseModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={savingCourse} className="bg-blue-600">
+            <Button type="primary" htmlType="submit" loading={savingCourse} >
               Save Course
             </Button>
           </div>
@@ -762,7 +732,7 @@ export const InstructorDashboard = () => {
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={() => setIsLessonModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={savingLesson} className="bg-blue-600">
+            <Button type="primary" htmlType="submit" loading={savingLesson} >
               Save Lesson
             </Button>
           </div>
@@ -812,8 +782,8 @@ export const InstructorDashboard = () => {
             <Form.List name="questions">
               {(fields, { add, remove }) => (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                    <span className="font-bold text-sm text-gray-800">
+                  <div className="flex items-center justify-between border-t border-hairline pt-3">
+                    <span className="text-caption-strong text-ink">
                       Assessment Questions
                     </span>
                     <Button
@@ -830,7 +800,7 @@ export const InstructorDashboard = () => {
                     <Card
                       key={key}
                       size="small"
-                      className="bg-gray-50 border-gray-200 rounded-xl"
+                      className="border-hairline"
                       title={`Question ${idx + 1}`}
                       extra={
                         fields.length > 1 && (
@@ -937,9 +907,9 @@ export const InstructorDashboard = () => {
             </Form.List>
           )}
 
-          <div className="flex justify-end space-x-2 pt-4 border-t border-gray-100">
+          <div className="flex justify-end space-x-2 pt-4 border-t border-hairline">
             <Button onClick={() => setIsQuizModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={savingQuiz} className="bg-indigo-600">
+            <Button type="primary" htmlType="submit" loading={savingQuiz} >
               Save Assessment
             </Button>
           </div>
@@ -959,38 +929,42 @@ export const InstructorDashboard = () => {
         ) : quizResults.length === 0 ? (
           <EmptyState description="No learners have submitted attempts for this quiz yet." />
         ) : (
-          <Table
-            dataSource={quizResults}
-            rowKey="id"
-            pagination={{ pageSize: 5 }}
-            columns={[
-              {
-                title: 'Learner',
-                dataIndex: 'userName',
-                key: 'userName',
-                render: (name) => <strong>{name || 'Student'}</strong>,
-              },
-              {
-                title: 'Score',
-                key: 'score',
-                render: (_, r) => `${r.score} / ${r.totalPoints}`,
-              },
-              {
-                title: 'Percentage',
-                dataIndex: 'percentage',
-                key: 'percentage',
-                render: (p) => `${p}%`,
-              },
-              {
-                title: 'Status',
-                dataIndex: 'passed',
-                key: 'passed',
-                render: (pass) => (
-                  <Tag color={pass ? 'success' : 'error'}>{pass ? 'PASSED' : 'FAILED'}</Tag>
-                ),
-              },
-            ]}
-          />
+          <div className="table-shell">
+            <Table
+              dataSource={quizResults}
+              rowKey="id"
+              pagination={{ pageSize: 5 }}
+              columns={[
+                {
+                  title: 'Learner',
+                  dataIndex: 'userName',
+                  key: 'userName',
+                  render: (name) => <strong className="font-semibold">{name || 'Student'}</strong>,
+                },
+                {
+                  title: 'Score',
+                  key: 'score',
+                  render: (_, r) => `${r.score} / ${r.totalPoints}`,
+                },
+                {
+                  title: 'Percentage',
+                  dataIndex: 'percentage',
+                  key: 'percentage',
+                  render: (p) => `${p}%`,
+                },
+                {
+                  title: 'Status',
+                  dataIndex: 'passed',
+                  key: 'passed',
+                  render: (pass) => (
+                    <Badge variant={pass ? 'success' : 'danger'}>
+                      {pass ? 'PASSED' : 'FAILED'}
+                    </Badge>
+                  ),
+                },
+              ]}
+            />
+          </div>
         )}
       </Modal>
     </div>

@@ -2,39 +2,857 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
+/* ============================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Geist Mono', SFMono-Regular, Menlo, Consolas, monospace;
+    --gutter: 16px;
+    --brand-gradient: linear-gradient(90deg, #fc4c02 0%, #ef2cc1 52%, #bdbbff 100%);
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --gutter: 32px;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* clip (not hidden) so .bleed bands can reach the viewport edges without
+       creating a horizontal scroll container (keeps position:sticky working) */
+    overflow-x: clip;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01';
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 500;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: #c8f6f9;
+    color: #000000;
+  }
+
+  /* Visible keyboard focus everywhere (currentColor adapts to surface) */
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #ebebeb;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #b3b3b3;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #808080;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background-color: #f8fafc;
+/* ============================================================================
+   COMPONENTS — design-system primitives
+   ========================================================================== */
+
+@layer components {
+  /* --- Layout ---------------------------------------------------------- */
+  .container-app {
+    @apply mx-auto w-full max-w-app px-4 md:px-8;
+  }
+
+  .band {
+    @apply w-full;
+  }
+
+  .band-dark {
+    background-color: #010120;
+    color: #ffffff;
+  }
+
+  .band-light {
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  .section {
+    @apply py-14 md:py-section;
+  }
+
+  .section-tight {
+    @apply py-12 md:py-14;
+  }
+
+  /* Break a block out of the page gutter to the true viewport edges so
+     dark bands read as page surfaces rather than cards. When a role sidebar
+     is present (lg+), the band can only span the content column, so it
+     cancels the main gutter instead of breaking out to the viewport. */
+  .bleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+  }
+
+  @media (min-width: 992px) {
+    .has-sidebar .bleed {
+      width: auto;
+      margin-left: -32px;
+      margin-right: -32px;
+    }
+  }
+
+  /* --- Typography helpers ---------------------------------------------- */
+  .eyebrow {
+    @apply font-mono text-mono-eyebrow uppercase text-body;
+  }
+
+  .band-dark .eyebrow {
+    color: #999999;
+  }
+
+  .text-secondary {
+    @apply text-body;
+  }
+
+  .lead {
+    @apply text-body-lg text-ink;
+  }
+
+  .band-dark .lead {
+    color: #999999;
+  }
+
+  /* --- Surfaces --------------------------------------------------------- */
+  .card {
+    @apply bg-canvas border border-hairline rounded-sm text-ink;
+  }
+
+  .card-dark {
+    background-color: #010120;
+    border: 1px solid #26263a;
+    @apply rounded-sm text-on-dark;
+  }
+
+  .card-pad {
+    @apply p-6;
+  }
+
+  .card-pad-lg {
+    @apply p-6 md:p-8;
+  }
+
+  .divider {
+    @apply border-t border-hairline;
+  }
+
+  .band-dark .divider {
+    border-top-color: #26263a;
+  }
+
+  /* --- Badges ----------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-sm px-2 py-1 text-mono-label uppercase whitespace-nowrap;
+  }
+
+  .badge-neutral {
+    background-color: #ebebeb;
+    color: #000000;
+    border: 1px solid #ebebeb;
+  }
+
+  .badge-dark {
+    background-color: #313641;
+    color: #ffffff;
+    border: 1px solid #313641;
+  }
+
+  .badge-mint {
+    background-color: #c8f6f9;
+    color: #000000;
+    border: 1px solid #c8f6f9;
+  }
+
+  .badge-outline {
+    background-color: transparent;
+    color: #000000;
+    border: 1px solid #ebebeb;
+  }
+
+  .badge-success {
+    background-color: rgba(26, 127, 75, 0.1);
+    color: #1a7f4b;
+    border: 1px solid rgba(26, 127, 75, 0.25);
+  }
+
+  .badge-danger {
+    background-color: rgba(192, 38, 38, 0.08);
+    color: #c02626;
+    border: 1px solid rgba(192, 38, 38, 0.25);
+  }
+
+  .badge-warning {
+    background-color: rgba(192, 100, 20, 0.1);
+    color: #a34e12;
+    border: 1px solid rgba(192, 100, 20, 0.25);
+  }
+
+  /* --- Forms ------------------------------------------------------------ */
+  .field-label {
+    @apply block text-caption-strong text-ink mb-1.5;
+  }
+
+  .field-hint {
+    @apply block text-caption text-body mt-1;
+  }
+
+  .field-error {
+    @apply block text-caption mt-1;
+    color: #c02626;
+  }
+
+  .input-shell {
+    @apply w-full rounded-sm border border-hairline bg-canvas px-3 py-2 text-body-md text-ink;
+    min-height: 40px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input-shell::placeholder {
+    color: #999999;
+  }
+
+  .input-shell:hover {
+    border-color: #000000;
+  }
+
+  .input-shell:focus {
+    outline: none;
+    border-color: #000000;
+    box-shadow: 0 0 0 2px rgba(1, 1, 32, 0.08);
+  }
+
+  .input-shell[aria-invalid='true'] {
+    border-color: #c02626;
+  }
+
+  .input-shell:disabled {
+    background-color: #f6f6f6;
+    color: #999999;
+    cursor: not-allowed;
+  }
+
+  /* --- Data table chrome ------------------------------------------------ */
+  .table-shell {
+    @apply w-full overflow-x-auto rounded-sm border border-hairline bg-canvas;
+  }
+
+  /* --- Progress --------------------------------------------------------- */
+  .progress-track {
+    @apply w-full h-1.5 bg-hairline rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-primary rounded-full transition-all duration-500;
+  }
+
+  /* --- Section header --------------------------------------------------- */
+  .section-head {
+    @apply flex flex-col gap-4 md:flex-row md:items-end md:justify-between;
+  }
+
+  /* --- Hover affordance (border weight change only — no lift/shadow) ---- */
+  .card-interactive {
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .card-interactive:hover {
+    border-color: #000000;
+  }
+
+  /* --- Toggle pill group (segmented filter) ------------------------------ */
+  .toggle-group {
+    @apply inline-flex flex-wrap items-center gap-2;
+  }
+
+  .toggle-pill {
+    @apply rounded-sm border border-hairline bg-canvas px-3 py-2 text-mono-label uppercase text-body transition-colors;
+    min-height: 36px;
+  }
+
+  .toggle-pill:hover {
+    border-color: #000000;
+    color: #000000;
+  }
+
+  .toggle-pill[aria-pressed='true'] {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+  }
+
+  /* --- Key/value meta list ---------------------------------------------- */
+  .meta-row {
+    @apply flex items-baseline justify-between gap-4 py-2.5 text-caption;
+  }
+
+  .meta-row + .meta-row {
+    border-top: 1px solid #ebebeb;
+  }
+
+  .meta-row dt {
+    @apply text-body;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .meta-row dd {
+    @apply m-0 text-right text-body-md text-ink;
+  }
+
+  /* --- Giant wordmark sign-off ----------------------------------------- */
+  .wordmark-banner {
+    @apply w-full overflow-hidden select-none leading-none bg-canvas;
+    color: #ebebeb;
+  }
+
+  .wordmark-banner span {
+    display: block;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    font-size: 20vw;
+    line-height: 0.86;
+    padding-block: 0.06em;
+  }
+
+  /* --- Gradient ribbon animation --------------------------------------- */
+  .ribbon-drift {
+    animation: ribbon-drift 22s ease-in-out infinite alternate;
+    transform-origin: 50% 50%;
+  }
+
+  .ribbon-drift-slow {
+    animation: ribbon-drift 34s ease-in-out infinite alternate-reverse;
+    transform-origin: 50% 50%;
+  }
 }
 
-/* Ensure smooth scrolling */
-html {
-  scroll-behavior: smooth;
+@keyframes ribbon-drift {
+  0% {
+    transform: rotate(-3deg) scale(1);
+  }
+  100% {
+    transform: rotate(3deg) scale(1.05);
+  }
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+.skeleton {
+  background: linear-gradient(90deg, #ebebeb 25%, #f6f6f6 50%, #ebebeb 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+/* ============================================================================
+   ANT DESIGN OVERRIDES
+   Unlayered on purpose: antd injects unlayered styles, so these must sit
+   outside @layer to win the cascade.
+   ========================================================================== */
+
+/* --- Buttons ------------------------------------------------------------ */
+.ant-btn {
+  border-radius: 4px !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 13px;
+  box-shadow: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.ant-btn-lg {
+  font-size: 16px !important;
+  letter-spacing: 0.005em !important;
+}
+
+.ant-btn-sm {
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  gap: 6px;
+}
+
+.ant-btn-primary {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-primary:not(:disabled):hover,
+.ant-btn-primary:not(:disabled):focus {
+  background: #1f1f1f !important;
+  border-color: #1f1f1f !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-default {
+  background: #ffffff !important;
+  border-color: #ebebeb !important;
+  color: #000000 !important;
+}
+
+.ant-btn-default:not(:disabled):hover,
+.ant-btn-default:not(:disabled):focus {
+  border-color: #000000 !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+.ant-btn-text:not(:disabled):hover,
+.ant-btn-text:not(:disabled):focus {
+  background: #ebebeb !important;
+  color: #000000 !important;
+}
+
+/* Hero-context button variants (mint + white pills) — unlayered to beat the
+   default/primary rules above. */
+.ant-btn.btn-mint {
+  background-color: #c8f6f9 !important;
+  border-color: #c8f6f9 !important;
+  color: #000000 !important;
+}
+
+.ant-btn.btn-mint:not(:disabled):hover,
+.ant-btn.btn-mint:not(:disabled):focus {
+  background-color: #a9edf4 !important;
+  border-color: #a9edf4 !important;
+  color: #000000 !important;
+}
+
+.ant-btn.btn-white {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.ant-btn.btn-white:not(:disabled):hover,
+.ant-btn.btn-white:not(:disabled):focus {
+  background-color: #ebebeb !important;
+  border-color: #ebebeb !important;
+  color: #000000 !important;
+}
+
+/* Translucent ghost used on dark hero / research surfaces */
+.ant-btn.btn-ghost-dark {
+  background-color: #313641 !important;
+  border-color: #313641 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn.btn-ghost-dark:not(:disabled):hover,
+.ant-btn.btn-ghost-dark:not(:disabled):focus {
+  background-color: #454b59 !important;
+  border-color: #454b59 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn:disabled {
+  opacity: 0.45;
+}
+
+.ant-btn-group > .ant-btn:first-child,
+.ant-btn-group > .ant-btn:last-child {
+  border-radius: 4px !important;
+}
+
+/* --- Inputs ------------------------------------------------------------- */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-input-number,
+.ant-picker {
+  border-radius: 4px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 16px !important;
+}
+
+.ant-input:hover,
+.ant-select:hover .ant-select-selector {
+  border-color: #000000 !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 2px rgba(1, 1, 32, 0.08) !important;
+}
+
+.ant-input::placeholder {
+  color: #999999;
+}
+
+.ant-input-group-addon {
+  border-radius: 4px;
+  background: #ebebeb;
+  border-color: #ebebeb;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999999;
+}
+
+.ant-form-item-label > label {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+  letter-spacing: 0;
+}
+
+.ant-form-item-explain-error {
+  font-size: 13px;
+  color: #c02626;
+  letter-spacing: 0;
+}
+
+.ant-select-selection-placeholder,
+.ant-input::placeholder {
+  color: #999999;
+}
+
+/* --- Tabs: uppercase mono labels ---------------------------------------- */
+.ant-tabs .ant-tabs-tab-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999999;
+}
+
+.ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #000000;
+}
+
+.ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: #000000;
+}
+
+.ant-tabs-ink-bar {
+  background: #000000 !important;
+  height: 2px !important;
+}
+
+.ant-tabs-nav {
+  margin-bottom: 16px !important;
+}
+
+.ant-tabs-tab {
+  padding: 8px 0 !important;
+  margin-right: 24px !important;
+}
+
+/* --- Table: hairline rows + mono-caps header ---------------------------- */
+.ant-table {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.ant-table-thead > tr > th,
+.ant-table-thead > tr > td {
+  background: #ebebeb !important;
+  color: #999999 !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #ebebeb !important;
+  padding: 12px 16px !important;
+}
+
+.ant-table-thead > tr > th::before {
+  display: none !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #ebebeb !important;
+  padding: 12px 16px !important;
+  color: #000000;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #fafafa !important;
+}
+
+.ant-table-cell {
+  border-radius: 4px;
+}
+
+.ant-pagination .ant-pagination-item {
+  border-radius: 4px;
+}
+
+.ant-pagination .ant-pagination-item-active {
+  background: #000000;
+  border-color: #000000;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+  color: #ffffff;
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th:first-child,
+.ant-table-wrapper .ant-table-tbody > tr > td:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* --- Modal / popover / dropdown ----------------------------------------- */
+.ant-modal-content,
+.ant-modal-header,
+.ant-dropdown-menu,
+.ant-popover-inner,
+.ant-picker-dropdown {
+  border-radius: 4px !important;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #ebebeb;
+  margin-bottom: 0;
+  padding-bottom: 16px;
+}
+
+.ant-modal-title {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.ant-modal-close {
+  border-radius: 4px;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.ant-popover-inner-content,
+.ant-popover-message-title {
+  font-size: 14px;
+}
+
+/* --- Card: hairline frame, 4px radius, no elevation ---------------------- */
+.ant-card {
+  border-radius: 4px !important;
+  border-color: #ebebeb !important;
+  box-shadow: none !important;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #ebebeb;
+}
+
+.ant-card-head-title {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* --- Popconfirm ---------------------------------------------------------- */
+.ant-popover-inner {
+  border: 1px solid #ebebeb;
+}
+
+/* --- Feedback: message --------------------------------------------------- */
+.ant-message-notice-content {
+  border-radius: 4px !important;
+  font-family: var(--font-sans);
+  box-shadow: 0 4px 10px 0 rgba(1, 1, 32, 0.1) !important;
+}
+
+/* --- Segmented toggle pill group (Radio.Button) -------------------------- */
+.ant-radio-group-solid .ant-radio-button-wrapper-checked {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.ant-radio-button-wrapper {
+  border-radius: 4px !important;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  height: 36px;
+  line-height: 34px;
+}
+
+.ant-radio-button-wrapper:not(:first-child)::before {
+  display: none;
+}
+
+/* --- Progress / Spin / Rate --------------------------------------------- */
+.ant-progress-bg {
+  background: #000000 !important;
+}
+
+.ant-progress-trail {
+  background: #ebebeb !important;
+}
+
+.ant-spin-dot-item {
+  background-color: #000000 !important;
+}
+
+.ant-rate {
+  color: #f5a623;
+}
+
+/* --- Avatars: square crop, hard-edge corners (no avatar pill) ------------ */
+.ant-avatar {
+  border-radius: 4px !important;
+}
+
+.ant-avatar-string {
+  font-weight: 500;
+}
+
+/* --- Tags kept from antd are never used; guard against stray defaults ---- */
+.ant-tag {
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* --- Drawer -------------------------------------------------------------- */
+.ant-drawer-content,
+.ant-drawer-header,
+.ant-drawer-body {
+  border-radius: 0 !important;
+}
+
+.ant-drawer-header {
+  border-bottom: 1px solid #ebebeb;
+  padding: 16px 20px;
+}
+
+.ant-drawer-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999999;
+}
+
+/* --- Scroll containers inside dense cards -------------------------------- */
+.ant-tabs-content-holder,
+.ant-tabs-content,
+.ant-tabs-tabpane {
+  min-width: 0;
+}
+
+/* ============================================================================
+   RESPONSIVE TOUCH TARGETS + MOTION + PRINT
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .ant-btn:not(.ant-btn-sm) {
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    border: none !important;
+  }
 }

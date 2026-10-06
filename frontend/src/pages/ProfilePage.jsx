@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Avatar, Tag, message } from 'antd';
-import { UserOutlined, MailOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Avatar, message } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { userApi } from '../api';
 import { formatDate } from '../utils/formatters';
+import { Badge, SectionHeader } from '../components/ui';
 
 const { TextArea } = Input;
 
@@ -31,67 +32,75 @@ export const ProfilePage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <Card className="rounded-2xl border-gray-200 shadow-xs p-2 sm:p-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 text-center sm:text-left border-b border-gray-100 pb-6 mb-6">
+    <div className="mx-auto max-w-3xl space-y-8">
+      <SectionHeader
+        eyebrow="Account"
+        title="Profile & Settings"
+        description="Manage how you appear across the platform and keep your details up to date."
+      />
+
+      {/* Identity card */}
+      <div className="card">
+        <div className="card-pad-lg flex flex-col items-center gap-5 border-b border-hairline text-center sm:flex-row sm:gap-6 sm:text-left">
           <Avatar
             size={80}
             src={user?.avatarUrl}
             icon={!user?.avatarUrl && <UserOutlined />}
-            className="bg-blue-600 text-white text-3xl shrink-0"
+            className="shrink-0"
           />
           <div>
-            <div className="flex items-center justify-center sm:justify-start space-x-2">
-              <h2 className="text-xl font-bold text-gray-900">{user?.name}</h2>
-              <Tag color="blue">{user?.role}</Tag>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              <h2 className="text-display-md text-ink">{user?.name}</h2>
+              <Badge variant="outline">{user?.role}</Badge>
             </div>
-            <p className="text-gray-500 text-sm mt-0.5">{user?.email}</p>
-            <p className="text-gray-400 text-xs mt-2">
+            <p className="mt-1 text-body-md text-body">{user?.email}</p>
+            <p className="mt-2 text-mono-eyebrow uppercase text-body">
               Member since: {formatDate(user?.createdAt)}
             </p>
           </div>
         </div>
 
-        <h3 className="font-bold text-base text-gray-800 mb-4">Edit Profile</h3>
+        <div className="card-pad-lg">
+          <p className="eyebrow">Edit profile</p>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpdate}
-          initialValues={{
-            name: user?.name,
-            bio: user?.bio,
-            avatarUrl: user?.avatarUrl,
-          }}
-        >
-          <Form.Item
-            name="name"
-            label="Full Name"
-            rules={[{ required: true, message: 'Please enter your name' }]}
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleUpdate}
+            className="mt-4"
+            initialValues={{
+              name: user?.name,
+              bio: user?.bio,
+              avatarUrl: user?.avatarUrl,
+            }}
           >
-            <Input prefix={<UserOutlined className="text-gray-400" />} />
-          </Form.Item>
-
-          <Form.Item name="avatarUrl" label="Avatar Image URL">
-            <Input placeholder="https://example.com/avatar.jpg" />
-          </Form.Item>
-
-          <Form.Item name="bio" label="Short Bio">
-            <TextArea rows={3} placeholder="Tell others about your learning interests and goals..." />
-          </Form.Item>
-
-          <div className="flex justify-end">
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              className="bg-blue-600 hover:bg-blue-700"
+            <Form.Item
+              name="name"
+              label="Full Name"
+              rules={[{ required: true, message: 'Please enter your name' }]}
             >
-              Save Profile Changes
-            </Button>
-          </div>
-        </Form>
-      </Card>
+              <Input prefix={<UserOutlined />} />
+            </Form.Item>
+
+            <Form.Item name="avatarUrl" label="Avatar Image URL">
+              <Input placeholder="https://example.com/avatar.jpg" />
+            </Form.Item>
+
+            <Form.Item name="bio" label="Short Bio">
+              <TextArea
+                rows={3}
+                placeholder="Tell others about your learning interests and goals..."
+              />
+            </Form.Item>
+
+            <div className="flex justify-end">
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Save Profile Changes
+              </Button>
+            </div>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 };

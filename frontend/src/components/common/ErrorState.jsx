@@ -1,5 +1,5 @@
 import React from 'react';
-import { Result, Button } from 'antd';
+import { Button } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 
 export const ErrorState = ({
@@ -9,25 +9,23 @@ export const ErrorState = ({
   status = 'error',
 }) => {
   return (
-    <div className="p-6 bg-white rounded-xl shadow-sm border border-red-100 my-4 text-center">
-      <Result
-        status={status}
-        title={<span className="text-gray-800 text-lg font-semibold">{title}</span>}
-        subTitle={<span className="text-gray-500 text-sm">{subTitle}</span>}
-        extra={
-          onRetry && (
-            <Button
-              type="primary"
-              danger
-              icon={<ReloadOutlined />}
-              onClick={onRetry}
-              className="mt-2"
-            >
+    <div
+      className="card my-4"
+      role="alert"
+      data-status={status}
+    >
+      <div className="card-pad-lg text-center">
+        <p className="eyebrow">Something broke</p>
+        <h3 className="mt-4 text-display-md text-ink">{title}</h3>
+        <p className="mt-3 text-body-md text-ink">{subTitle}</p>
+        {onRetry && (
+          <div className="mt-6 flex justify-center">
+            <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
               Retry
             </Button>
-          )
-        }
-      />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

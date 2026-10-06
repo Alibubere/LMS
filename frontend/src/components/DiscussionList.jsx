@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Input, Form, message, Card } from 'antd';
+import { Button, Input, Form, message } from 'antd';
 import { PlusOutlined, MessageOutlined } from '@ant-design/icons';
 import DiscussionItem from './DiscussionItem';
 import LoadingState from './common/LoadingState';
@@ -57,10 +57,12 @@ export const DiscussionList = ({ courseId }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-gray-800 flex items-center space-x-2">
-          <MessageOutlined className="text-blue-600" />
-          <span>Course Discussions ({discussions.length})</span>
+      <div className="section-head">
+        <h3 className="text-display-md text-ink">
+          <span className="inline-flex items-center gap-2">
+            <MessageOutlined />
+            <span>Course Discussions ({discussions.length})</span>
+          </span>
         </h3>
 
         {isAuthenticated && !showNewThreadForm && (
@@ -69,7 +71,6 @@ export const DiscussionList = ({ courseId }) => {
             icon={<PlusOutlined />}
             size="small"
             onClick={() => setShowNewThreadForm(true)}
-            className="bg-blue-600 hover:bg-blue-700"
           >
             New Thread
           </Button>
@@ -77,8 +78,9 @@ export const DiscussionList = ({ courseId }) => {
       </div>
 
       {showNewThreadForm && (
-        <Card className="border-blue-200 bg-blue-50/30 rounded-xl mb-4">
-          <h4 className="font-semibold text-sm text-gray-800 mb-3">Start a Discussion</h4>
+        <div className="card mb-4">
+          <div className="card-pad">
+            <p className="eyebrow mb-3">Start a discussion</p>
           <Form form={form} layout="vertical" onFinish={handleCreateDiscussion}>
             <Form.Item
               name="title"
@@ -98,12 +100,13 @@ export const DiscussionList = ({ courseId }) => {
 
             <div className="flex justify-end space-x-2">
               <Button onClick={() => setShowNewThreadForm(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={submitting} className="bg-blue-600">
+              <Button type="primary" htmlType="submit" loading={submitting} >
                 Post Discussion
               </Button>
             </div>
           </Form>
-        </Card>
+          </div>
+        </div>
       )}
 
       {loading && <LoadingState tip="Loading forum discussions..." />}

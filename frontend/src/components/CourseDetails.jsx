@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Tabs, Tag, Avatar, Card, List, Button, message } from 'antd';
+import { Tabs, Avatar, Button } from 'antd';
 import {
-  BookOutlined,
   UserOutlined,
-  ClockCircleOutlined,
-  ReadOutlined,
   PlayCircleOutlined,
   CheckCircleOutlined,
-  FileTextOutlined,
-  TrophyOutlined,
   MessageOutlined,
   StarOutlined,
-  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import EnrollmentButton from './EnrollmentButton';
 import ProgressBar from './ProgressBar';
@@ -20,14 +14,18 @@ import DiscussionList from './DiscussionList';
 import FeedbackForm from './FeedbackForm';
 import LoadingState from './common/LoadingState';
 import ErrorState from './common/ErrorState';
+import EmptyState from './common/EmptyState';
+import { Badge } from './ui';
 import { courseApi, lessonApi, progressApi, enrollmentApi, quizApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { formatDuration } from '../utils/formatters';
 
+const pad = (n) => String(n).padStart(2, '0');
+
 export const CourseDetails = ({ courseId: propCourseId }) => {
   const { id: routeCourseId } = useParams();
   const courseId = propCourseId || routeCourseId;
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -43,11 +41,9 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
       setLoading(true);
       setError(null);
 
-      // Load course details
       const courseData = await courseApi.getCourseById(courseId);
       setCourse(courseData);
 
-      // Load lessons
       try {
         const lessonData = await lessonApi.getLessonsByCourse(courseId);
         setLessons(lessonData || []);
@@ -55,7 +51,6 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
         setLessons([]);
       }
 
-      // Load quizzes
       try {
         const quizData = await quizApi.getQuizzesByCourse(courseId);
         setQuizzes(quizData || []);
@@ -63,7 +58,6 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
         setQuizzes([]);
       }
 
-      // If user is authenticated, check enrollment & progress
       if (user?.id) {
         try {
           const userEnrollments = await enrollmentApi.getUserEnrollments(user.id);
@@ -105,107 +99,103 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
     );
   }
 
-  const defaultThumbnail = `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80`;
+  const defaultThumbnail =
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80';
+
+  const syllabusTab = lessons.length === 0 ? (
+    <EmptyState description="No lessons added yet for this course." />
+  ) : (
+    <ul className="border-t border-hairline">
+      {lessons.map((item, index) => (
+        <li key={item.id} className="flex flex-wrap items-start gap-4 border-b border-hairline py-5">
+          <span className="eyebrow w-8 shrink-0 pt-1">{pad(index + 1)}</span>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-body-md-strong text-ink">{item.title}</span>
+              {item.completed && <Badge variant="success">Completed</Badge>}
+            </div>
+            <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-caption text-body">
+              <span>{formatDuration(item.durationMinutes)}</span>
+              {item.description && <span>{item.description}</span>}
+            </div>
+          </div>
+
+          <div className="shrink-0">
+            {isEnrolled ? (
+              <Link to={`/courses/${course.id}/learn?lesson=${item.id}`}>
+                <Button
+                  type={item.completed ? 'default' : 'primary'}
+                  size="small"
+                  icon={item.completed ? <CheckCircleOutlined /> : <PlayCircleOutlined />}
+                >
+                  {item.completed ? 'Review' : 'Play'}
+                </Button>
+              </Link>
+            ) : (
+              <span className="text-caption text-body">Enroll to access</span>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const assessmentsTab = quizzes.length === 0 ? (
+    <EmptyState description="No assessments attached to this course." />
+  ) : (
+    <div className="grid gap-5 md:grid-cols-2">
+      {quizzes.map((quiz) => (
+        <article key={quiz.id} className="card card-interactive">
+          <div className="card-pad">
+            <p className="eyebrow">Assessment</p>
+            <h4 className="mt-3 text-display-md text-ink">{quiz.title}</h4>
+            <p className="mt-2 text-caption text-body">
+              {quiz.description || 'Test your knowledge on course topics'}
+            </p>
+
+            <dl className="mt-5">
+              <div className="meta-row">
+                <dt>Passing score</dt>
+                <dd>{quiz.passingScore}%</dd>
+              </div>
+              {quiz.timeLimitMinutes ? (
+                <div className="meta-row">
+                  <dt>Time limit</dt>
+                  <dd>{quiz.timeLimitMinutes} minutes</dd>
+                </div>
+              ) : null}
+              <div className="meta-row">
+                <dt>Questions</dt>
+                <dd>{quiz.totalQuestions || (quiz.questions ? quiz.questions.length : 0)}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-5">
+              {isEnrolled ? (
+                <Link to={`/quizzes/${quiz.id}`}>
+                  <Button type="primary">Take Assessment</Button>
+                </Link>
+              ) : (
+                <span className="text-caption text-body">Enroll to participate</span>
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 
   const tabItems = [
     {
       key: 'syllabus',
-      label: (
-        <span>
-          <ReadOutlined /> Syllabus ({lessons.length} lessons)
-        </span>
-      ),
-      children: (
-        <div className="space-y-4">
-          <List
-            itemLayout="horizontal"
-            dataSource={lessons}
-            locale={{ emptyText: 'No lessons added yet for this course.' }}
-            renderItem={(item, index) => (
-              <List.Item
-                className="hover:bg-gray-50/70 p-4 rounded-xl border border-gray-100 mb-2 transition"
-                actions={[
-                  isEnrolled ? (
-                    <Link to={`/courses/${course.id}/learn?lesson=${item.id}`}>
-                      <Button
-                        type={item.completed ? 'default' : 'primary'}
-                        size="small"
-                        icon={item.completed ? <CheckCircleOutlined className="text-emerald-500" /> : <PlayCircleOutlined />}
-                        className={!item.completed ? 'bg-blue-600' : ''}
-                      >
-                        {item.completed ? 'Review' : 'Play'}
-                      </Button>
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-gray-400">Enroll to access</span>
-                  ),
-                ]}
-              >
-                <List.Item.Meta
-                  avatar={
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xs">
-                      {index + 1}
-                    </div>
-                  }
-                  title={
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-gray-900">{item.title}</span>
-                      {item.completed && <Tag color="success">Completed</Tag>}
-                    </div>
-                  }
-                  description={
-                    <div className="text-xs text-gray-500 flex items-center space-x-3 mt-1">
-                      <span>{formatDuration(item.durationMinutes)}</span>
-                      {item.description && <span>• {item.description}</span>}
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        </div>
-      ),
+      label: <span>Syllabus ({lessons.length} lessons)</span>,
+      children: syllabusTab,
     },
     {
       key: 'quizzes',
-      label: (
-        <span>
-          <QuestionCircleOutlined /> Assessments ({quizzes.length})
-        </span>
-      ),
-      children: (
-        <div className="space-y-4">
-          <List
-            dataSource={quizzes}
-            locale={{ emptyText: 'No assessments attached to this course.' }}
-            renderItem={(quiz) => (
-              <Card className="rounded-xl border-gray-200 mb-3 hover:shadow-xs transition">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <h4 className="font-bold text-base text-gray-900">{quiz.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1">{quiz.description || 'Test your knowledge on course topics'}</p>
-                    <div className="flex items-center space-x-4 text-xs text-gray-400 mt-2">
-                      <span>Passing Score: {quiz.passingScore}%</span>
-                      {quiz.timeLimitMinutes && <span>Time Limit: {quiz.timeLimitMinutes} mins</span>}
-                      <span>Questions: {quiz.totalQuestions || (quiz.questions ? quiz.questions.length : 0)}</span>
-                    </div>
-                  </div>
-
-                  {isEnrolled ? (
-                    <Link to={`/quizzes/${quiz.id}`}>
-                      <Button type="primary" className="bg-indigo-600 hover:bg-indigo-700">
-                        Take Assessment
-                      </Button>
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-gray-400">Enroll to participate</span>
-                  )}
-                </div>
-              </Card>
-            )}
-          />
-        </div>
-      ),
+      label: <span>Assessments ({quizzes.length})</span>,
+      children: assessmentsTab,
     },
     {
       key: 'discussions',
@@ -220,7 +210,7 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
       key: 'reviews',
       label: (
         <span>
-          <StarOutlined /> Reviews & Feedback
+          <StarOutlined /> Reviews &amp; Feedback
         </span>
       ),
       children: <FeedbackForm courseId={course.id} isEnrolled={isEnrolled} />,
@@ -228,81 +218,109 @@ export const CourseDetails = ({ courseId: propCourseId }) => {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Course Hero Banner */}
-      <div className="relative rounded-2xl overflow-hidden bg-slate-900 text-white shadow-md">
-        <div className="absolute inset-0 opacity-20">
-          <img
-            src={course.thumbnailUrl || defaultThumbnail}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
+    <div>
+      {/* ============================================ Course hero (dark band) */}
+      <section className="band band-dark bleed -mt-6 md:-mt-10">
+        <div className="container-app py-12 md:py-16">
+          <Link
+            to="/courses"
+            className="eyebrow inline-flex items-center gap-2 hover:text-on-dark"
+          >
+            ← All courses
+          </Link>
+
+          <div className="mt-8 grid gap-10 lg:grid-cols-[1.4fr_0.6fr]">
+            <div className="max-w-3xl space-y-5">
+              <div className="flex flex-wrap gap-2">
+                {course.categoryName && <Badge variant="mint">{course.categoryName}</Badge>}
+                {course.status && <Badge variant="dark">{course.status}</Badge>}
+              </div>
+
+              <h1 className="text-display-xxl text-on-dark">{course.title}</h1>
+
+              <p className="lead max-w-2xl">{course.description}</p>
+
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-hairline-dark pt-6">
+                <div className="flex items-center gap-3">
+                  <Avatar size={36} icon={<UserOutlined />} className="bg-surface-dark text-on-dark" />
+                  <span className="text-caption text-body">
+                    Instructor{' '}
+                    <strong className="text-caption-strong text-on-dark">
+                      {course.instructorName || 'Lead Faculty'}
+                    </strong>
+                  </span>
+                </div>
+                <div className="text-caption text-body">
+                  <strong className="text-caption-strong text-on-dark">
+                    {course.totalLessons || lessons.length}
+                  </strong>{' '}
+                  Lessons
+                </div>
+                <div className="text-caption text-body">
+                  <strong className="text-caption-strong text-on-dark">
+                    {course.totalEnrolled || 0}
+                  </strong>{' '}
+                  Students Enrolled
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <EnrollmentButton
+                  courseId={course.id}
+                  isEnrolled={isEnrolled}
+                  onEnrollmentChanged={(enrolled) => {
+                    setIsEnrolled(enrolled);
+                    fetchCourseData();
+                  }}
+                  size="large"
+                  showDropOption
+                  onDark
+                />
+                {isEnrolled && (
+                  <Link to={`/courses/${course.id}/learn`}>
+                    <Button size="large" className="btn-ghost-dark" icon={<PlayCircleOutlined />}>
+                      Go to Classroom
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Cover + progress */}
+            <div className="space-y-5">
+              <div className="overflow-hidden rounded-sm border border-hairline-dark">
+                <img
+                  src={course.thumbnailUrl || defaultThumbnail}
+                  alt={course.title}
+                  className="h-48 w-full object-cover lg:h-56"
+                />
+              </div>
+
+              {isEnrolled && progress && (
+                <div className="card-dark">
+                  <div className="card-pad">
+                    <p className="eyebrow">Your learning progress</p>
+                    <div className="mt-4">
+                      <ProgressBar
+                        percentage={progress.overallProgressPercentage || 0}
+                        completedLessons={progress.completedLessons || 0}
+                        totalLessons={progress.totalLessons || lessons.length}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="relative p-6 sm:p-10 z-10 max-w-4xl space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {course.categoryName && <Tag color="blue">{course.categoryName}</Tag>}
-            <Tag color="cyan">{course.status}</Tag>
-          </div>
+      </section>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            {course.title}
-          </h1>
-
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            {course.description}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-300 pt-2">
-            <div className="flex items-center space-x-2">
-              <Avatar icon={<UserOutlined />} className="bg-blue-600" />
-              <span>Instructor: <strong className="text-white">{course.instructorName || 'Lead Faculty'}</strong></span>
-            </div>
-            <div>
-              <strong>{course.totalLessons || lessons.length}</strong> Lessons
-            </div>
-            <div>
-              <strong>{course.totalEnrolled || 0}</strong> Students Enrolled
-            </div>
-          </div>
-
-          {/* Progress if enrolled */}
-          {isEnrolled && progress && (
-            <div className="bg-slate-800/80 backdrop-blur-xs p-4 rounded-xl border border-slate-700 max-w-lg mt-4">
-              <div className="text-xs font-semibold text-slate-300 mb-1">Your Learning Progress</div>
-              <ProgressBar
-                percentage={progress.overallProgressPercentage || 0}
-                completedLessons={progress.completedLessons || 0}
-                totalLessons={progress.totalLessons || lessons.length}
-              />
-            </div>
-          )}
-
-          <div className="pt-4 flex items-center space-x-3">
-            <EnrollmentButton
-              courseId={course.id}
-              isEnrolled={isEnrolled}
-              onEnrollmentChanged={(enrolled) => {
-                setIsEnrolled(enrolled);
-                fetchCourseData();
-              }}
-              size="large"
-              showDropOption={true}
-            />
-            {isEnrolled && (
-              <Link to={`/courses/${course.id}/learn`}>
-                <Button size="large" icon={<PlayCircleOutlined />} className="font-medium">
-                  Go to Classroom
-                </Button>
-              </Link>
-            )}
-          </div>
+      {/* ================================================= Tabs (white band) */}
+      <section className="band band-light bleed">
+        <div className="container-app py-10 md:py-14">
+          <Tabs defaultActiveKey="syllabus" items={tabItems} />
         </div>
-      </div>
-
-      {/* Tabs: Syllabus, Assessments, Discussions, Feedback */}
-      <div className="bg-white rounded-2xl p-6 shadow-xs border border-gray-200">
-        <Tabs defaultActiveKey="syllabus" items={tabItems} size="large" />
-      </div>
+      </section>
     </div>
   );
 };

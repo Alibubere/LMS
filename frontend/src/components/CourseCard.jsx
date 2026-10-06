@@ -1,17 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, Tag, Typography, Avatar } from 'antd';
-import {
-  BookOutlined,
-  UserOutlined,
-  TeamOutlined,
-  ReadOutlined,
-} from '@ant-design/icons';
+import { Link } from 'react-router-dom';
+import { Avatar } from 'antd';
+import { UserOutlined, TeamOutlined, ReadOutlined } from '@ant-design/icons';
 import EnrollmentButton from './EnrollmentButton';
 import ProgressBar from './ProgressBar';
+import { Badge } from './ui';
 import { COURSE_STATUS } from '../utils/constants';
-
-const { Title, Paragraph } = Typography;
 
 export const CourseCard = ({
   course,
@@ -20,8 +14,6 @@ export const CourseCard = ({
   showStatus = false,
   onEnrollmentChanged,
 }) => {
-  const navigate = useNavigate();
-
   const {
     id,
     title,
@@ -34,66 +26,67 @@ export const CourseCard = ({
     totalEnrolled = 0,
   } = course;
 
-  const defaultThumbnail = `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80`;
+  const defaultThumbnail =
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80';
 
   return (
-    <Card
-      hoverable
-      onClick={() => navigate(`/courses/${id}`)}
-      cover={
-        <div className="relative h-44 overflow-hidden bg-slate-800">
-          <img
-            alt={title}
-            src={thumbnailUrl || defaultThumbnail}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-            onError={(e) => {
-              e.target.src = defaultThumbnail;
-            }}
-          />
-          <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-            {categoryName && (
-              <Tag color="blue" className="font-medium shadow-sm">
-                {categoryName}
-              </Tag>
-            )}
-            {showStatus && status && (
-              <Tag color={status === COURSE_STATUS.PUBLISHED ? 'success' : 'default'}>
-                {status}
-              </Tag>
-            )}
-          </div>
+    <article className="card card-interactive flex h-full flex-col overflow-hidden">
+      {/* Cover */}
+      <Link
+        to={`/courses/${id}`}
+        className="relative block h-44 overflow-hidden border-b border-hairline bg-hairline"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <img
+          alt=""
+          src={thumbnailUrl || defaultThumbnail}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            e.target.src = defaultThumbnail;
+          }}
+        />
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {categoryName && <Badge variant="neutral">{categoryName}</Badge>}
+          {showStatus && status && (
+            <Badge variant={status === COURSE_STATUS.PUBLISHED ? 'mint' : 'outline'}>
+              {status}
+            </Badge>
+          )}
         </div>
-      }
-      className="flex flex-col h-full rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-shadow border-gray-200"
-      styles={{ body: { padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 } }}
-    >
-      <div className="flex-1">
-        <h3 className="font-bold text-base text-gray-900 line-clamp-1 hover:text-blue-600 transition mb-1">
-          {title}
+      </Link>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="text-body-md-strong text-ink">
+          <Link to={`/courses/${id}`} className="line-clamp-1 hover:text-body">
+            {title}
+          </Link>
         </h3>
 
-        <p className="text-gray-500 text-xs line-clamp-2 mb-3 min-h-[32px]">
+        <p className="mt-2 line-clamp-2 min-h-[40px] text-caption text-body">
           {description || 'Comprehensive course designed to build practical mastery.'}
         </p>
 
-        <div className="flex items-center space-x-2 text-xs text-gray-500 mb-3">
-          <Avatar size={20} icon={<UserOutlined />} className="bg-slate-300" />
-          <span className="font-medium truncate">{instructorName || 'Lead Instructor'}</span>
+        <div className="mt-4 flex items-center gap-2 text-caption text-body">
+          <Avatar size={22} icon={<UserOutlined />} className="bg-primary text-on-primary" />
+          <span className="truncate">{instructorName || 'Lead Instructor'}</span>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 pt-2.5 mb-3">
-          <div className="flex items-center space-x-1">
-            <ReadOutlined className="text-gray-400" />
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-hairline pt-3 text-caption text-body">
+          <span className="flex items-center gap-1.5">
+            <ReadOutlined />
             <span>{totalLessons} lessons</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <TeamOutlined className="text-gray-400" />
+          </span>
+          <span className="flex items-center gap-1.5">
+            <TeamOutlined />
             <span>{totalEnrolled} learners</span>
-          </div>
+          </span>
         </div>
 
         {isEnrolled && progress !== null && (
-          <div className="mb-3">
+          <div className="mt-4">
             <ProgressBar
               percentage={progress.overallProgressPercentage || progress.progressPercentage || 0}
               completedLessons={progress.completedLessons || 0}
@@ -104,10 +97,14 @@ export const CourseCard = ({
         )}
       </div>
 
-      <div className="pt-2 border-t border-gray-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+      {/* Footer */}
+      <div
+        className="mt-auto flex items-center justify-between gap-3 border-t border-hairline p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Link
           to={`/courses/${id}`}
-          className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+          className="text-caption text-ink underline underline-offset-4 hover:text-body"
         >
           View Details
         </Link>
@@ -118,7 +115,7 @@ export const CourseCard = ({
           size="small"
         />
       </div>
-    </Card>
+    </article>
   );
 };
 

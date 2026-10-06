@@ -6,13 +6,23 @@ import {
   TrophyOutlined,
   UserOutlined,
   PlusCircleOutlined,
-  FormOutlined,
   TeamOutlined,
   AppstoreOutlined,
-  SettingOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { ROLES } from '../utils/constants';
+
+const ROLE_LABELS = {
+  [ROLES.ADMIN]: 'Admin',
+  [ROLES.INSTRUCTOR]: 'Instructor',
+  [ROLES.LEARNER]: 'Learner',
+};
+
+const SECTION_LABELS = {
+  [ROLES.ADMIN]: 'Admin navigation',
+  [ROLES.INSTRUCTOR]: 'Instructor navigation',
+  [ROLES.LEARNER]: 'Learner navigation',
+};
 
 export const Sidebar = ({ onClose }) => {
   const { role } = useAuth();
@@ -47,11 +57,13 @@ export const Sidebar = ({ onClose }) => {
   const navLinks = getNavLinks();
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] flex flex-col p-4">
-      <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3 px-3">
-        {role || 'Learner'} Navigation
+    <aside className="flex w-full flex-col border-hairline bg-canvas lg:w-64 lg:shrink-0 lg:border-r lg:min-h-[calc(100vh-4rem)]">
+      <div className="border-b border-hairline px-6 py-5">
+        <p className="eyebrow">{SECTION_LABELS[role] || SECTION_LABELS[ROLES.LEARNER]}</p>
+        <p className="mt-2 text-body-md-strong text-ink">{ROLE_LABELS[role] || ROLE_LABELS[ROLES.LEARNER]}</p>
       </div>
-      <nav className="space-y-1">
+
+      <nav className="space-y-1 p-3" aria-label="Section">
         {navLinks.map((item) => (
           <NavLink
             key={item.to}
@@ -59,14 +71,14 @@ export const Sidebar = ({ onClose }) => {
             end={item.to === '/courses' || item.to === '/learner' || item.to === '/instructor' || item.to === '/admin'}
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+              `flex min-h-[44px] items-center gap-3 rounded-sm px-3 py-2.5 text-body-md transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700 font-semibold shadow-xs'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'bg-hairline font-medium text-ink'
+                  : 'text-body hover:bg-hairline hover:text-ink'
               }`
             }
           >
-            <span className="text-lg">{item.icon}</span>
+            <span className="text-base leading-none">{item.icon}</span>
             <span>{item.label}</span>
           </NavLink>
         ))}

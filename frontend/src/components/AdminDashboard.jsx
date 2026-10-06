@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Card,
   Table,
   Button,
-  Tag,
   Modal,
   Form,
   Input,
@@ -12,16 +10,12 @@ import {
   message,
   Tabs,
   Space,
-  Row,
-  Col,
-  Statistic,
   Avatar,
 } from 'antd';
 import {
   TeamOutlined,
   BookOutlined,
   AppstoreOutlined,
-  SafetyOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -32,6 +26,7 @@ import { ROLES, COURSE_STATUS } from '../utils/constants';
 import { formatDate } from '../utils/formatters';
 import LoadingState from './common/LoadingState';
 import ErrorState from './common/ErrorState';
+import { StatTile, Badge } from './ui';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -155,11 +150,11 @@ export const AdminDashboard = () => {
             size="small"
             src={rec.avatarUrl}
             icon={!rec.avatarUrl && <UserOutlined />}
-            className="bg-blue-600"
+            
           />
           <div>
-            <span className="font-semibold text-gray-900 block">{name}</span>
-            <span className="text-xs text-gray-400">{rec.email}</span>
+            <span className="block font-semibold text-ink">{name}</span>
+            <span className="text-caption text-body">{rec.email}</span>
           </div>
         </div>
       ),
@@ -169,8 +164,9 @@ export const AdminDashboard = () => {
       dataIndex: 'role',
       key: 'role',
       render: (r) => {
-        const color = r === ROLES.ADMIN ? 'red' : r === ROLES.INSTRUCTOR ? 'orange' : 'blue';
-        return <Tag color={color}>{r}</Tag>;
+        const variant =
+          r === ROLES.ADMIN ? 'danger' : r === ROLES.INSTRUCTOR ? 'warning' : 'outline';
+        return <Badge variant={variant}>{r}</Badge>;
       },
     },
     {
@@ -186,13 +182,13 @@ export const AdminDashboard = () => {
       title: 'Category Name',
       dataIndex: 'name',
       key: 'name',
-      render: (name) => <strong className="text-gray-900">{name}</strong>,
+      render: (name) => <strong className="font-semibold text-ink">{name}</strong>,
     },
     {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      render: (desc) => <span className="text-gray-500 text-xs">{desc || '—'}</span>,
+      render: (desc) => <span className="text-caption text-body">{desc || '—'}</span>,
     },
     {
       title: 'Courses Count',
@@ -228,7 +224,7 @@ export const AdminDashboard = () => {
       title: 'Course Title',
       dataIndex: 'title',
       key: 'title',
-      render: (t) => <strong className="text-gray-900">{t}</strong>,
+      render: (t) => <strong className="font-semibold text-ink">{t}</strong>,
     },
     {
       title: 'Instructor',
@@ -240,14 +236,14 @@ export const AdminDashboard = () => {
       title: 'Category',
       dataIndex: 'categoryName',
       key: 'categoryName',
-      render: (cat) => <Tag color="blue">{cat || 'General'}</Tag>,
+      render: (cat) => <Badge variant="outline">{cat || 'General'}</Badge>,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (st) => (
-        <Tag color={st === COURSE_STATUS.PUBLISHED ? 'success' : 'default'}>{st}</Tag>
+        <Badge variant={st === COURSE_STATUS.PUBLISHED ? 'success' : 'neutral'}>{st}</Badge>
       ),
     },
     {
@@ -275,67 +271,35 @@ export const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Admin Header */}
-      <div className="bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-md">
-        <div className="max-w-3xl space-y-2">
-          <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-300">
-            System Administration
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
-            Platform Command Center
-          </h1>
-          <p className="text-slate-300 text-sm">
-            Control platform taxonomy, monitor user accounts, and oversee learning system health.
-          </p>
+      {/* Admin header band */}
+      <div className="band band-dark bleed -mt-6 md:-mt-10">
+        <div className="container-app py-10 md:py-14">
+          <div className="max-w-3xl">
+            <p className="eyebrow">System administration</p>
+            <h1 className="mt-4 text-display-xl text-on-dark">Platform Command Center</h1>
+            <p className="lead mt-4">
+              Control platform taxonomy, monitor user accounts, and oversee learning system
+              health.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* KPI stats */}
-      <Row gutter={[16, 16]}>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Total Users</span>}
-              value={users.length}
-              prefix={<TeamOutlined className="text-blue-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Total Courses</span>}
-              value={courses.length}
-              prefix={<BookOutlined className="text-emerald-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Categories</span>}
-              value={categories.length}
-              prefix={<AppstoreOutlined className="text-purple-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card className="rounded-2xl border-gray-200 shadow-2xs">
-            <Statistic
-              title={<span className="text-xs font-semibold text-gray-500">Instructors</span>}
-              value={instructorsCount}
-              prefix={<SafetyOutlined className="text-amber-500 mr-1" />}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile value={users.length} label="Total Users" tone="mint" />
+        <StatTile value={courses.length} label="Total Courses" tone="periwinkle" />
+        <StatTile value={categories.length} label="Categories" tone="mint" />
+        <StatTile value={instructorsCount} label="Instructors" tone="periwinkle" />
+      </div>
 
       {/* Admin Management Tabs */}
-      <Card className="rounded-2xl border-gray-200 shadow-xs">
-        <Tabs
-          defaultActiveKey="users"
-          size="large"
-          items={[
+      <div className="card">
+        <div className="px-6 pt-4 pb-6 md:px-8">
+          <Tabs
+            defaultActiveKey="users"
+            size="large"
+            items={[
             {
               key: 'users',
               label: (
@@ -367,7 +331,7 @@ export const AdminDashboard = () => {
                       type="primary"
                       icon={<PlusOutlined />}
                       onClick={() => handleOpenCategoryModal()}
-                      className="bg-blue-600"
+                      
                     >
                       New Category
                     </Button>
@@ -400,7 +364,8 @@ export const AdminDashboard = () => {
             },
           ]}
         />
-      </Card>
+        </div>
+      </div>
 
       {/* Category Modal */}
       <Modal
@@ -425,7 +390,7 @@ export const AdminDashboard = () => {
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button onClick={() => setIsCategoryModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={savingCategory} className="bg-blue-600">
+            <Button type="primary" htmlType="submit" loading={savingCategory} >
               Save Category
             </Button>
           </div>

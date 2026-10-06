@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Form, Input, Button, Alert, Typography } from 'antd';
-import { MailOutlined, LockOutlined, BookOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Alert } from 'antd';
+import { MailOutlined, LockOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { ROLES } from '../utils/constants';
+import { GradientRibbon } from '../components/ui';
 
-const { Title, Text } = Typography;
+const ASSURANCES = [
+  'Progress syncs across every device',
+  'Certificates carry a verifiable code',
+  'Quizzes graded by the server, not a timer',
+];
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -43,90 +48,106 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center px-4 py-8">
-      <Card className="w-full max-w-md rounded-2xl shadow-md border-gray-200 p-2 sm:p-6">
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md">
-            <BookOutlined className="text-2xl" />
+    <section className="band band-dark bleed -mt-6 min-h-[70vh] md:-mt-10">
+      <div className="container-app py-14 md:py-section">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          {/* ---------------- Value panel */}
+          <div className="max-w-xl space-y-6">
+            <p className="eyebrow">Sign in</p>
+            <h1 className="text-display-xxl text-on-dark">Welcome Back</h1>
+            <p className="lead">Sign in to continue your learning journey.</p>
+
+            <div className="relative hidden max-w-md lg:block">
+              <GradientRibbon />
+            </div>
+
+            <ul className="space-y-3 border-t border-hairline-dark pt-6">
+              {ASSURANCES.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircleFilled className="mt-0.5 text-accent-mint" />
+                  <span className="text-body-md text-on-dark">{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <Title level={3} className="!mb-1">
-            Welcome Back
-          </Title>
-          <Text type="secondary" className="text-sm">
-            Sign in to continue your learning journey
-          </Text>
+
+          {/* ---------------- Form card */}
+          <div className="card w-full max-w-[520px] justify-self-center lg:justify-self-end">
+            <div className="card-pad-lg">
+              <p className="eyebrow">Account access</p>
+              <h2 className="mt-3 text-display-lg text-ink">Log in to lms.portal</h2>
+
+              {errorMessage && (
+                <Alert
+                  message="Sign In Failed"
+                  description={errorMessage}
+                  type="error"
+                  showIcon
+                  closable
+                  onClose={() => setErrorMessage(null)}
+                  className="mt-6"
+                />
+              )}
+
+              <Form
+                name="loginForm"
+                layout="vertical"
+                onFinish={onFinish}
+                requiredMark={false}
+                size="large"
+                className="mt-6"
+              >
+                <Form.Item
+                  name="email"
+                  label="Email Address"
+                  rules={[
+                    { required: true, message: 'Please enter your email address' },
+                    { type: 'email', message: 'Please enter a valid email address' },
+                  ]}
+                >
+                  <Input
+                    prefix={<MailOutlined className="mr-1 text-body" />}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="password"
+                  label="Password"
+                  rules={[
+                    { required: true, message: 'Please enter your password' },
+                    { min: 6, message: 'Password must be at least 6 characters' },
+                  ]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined className="mr-1 text-body" />}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                  />
+                </Form.Item>
+
+                <Form.Item className="mt-8 mb-0">
+                  <Button type="primary" htmlType="submit" loading={loading} block size="large">
+                    Log In
+                  </Button>
+                </Form.Item>
+
+                <p className="mt-6 text-center text-caption text-body">
+                  Don&apos;t have an account yet?{' '}
+                  <Link
+                    to="/register"
+                    className="text-ink underline underline-offset-4 hover:text-body"
+                  >
+                    Create an account
+                  </Link>
+                </p>
+              </Form>
+            </div>
+          </div>
         </div>
-
-        {errorMessage && (
-          <Alert
-            message="Sign In Failed"
-            description={errorMessage}
-            type="error"
-            showIcon
-            className="mb-6 rounded-xl"
-            closable
-            onClose={() => setErrorMessage(null)}
-          />
-        )}
-
-        <Form
-          name="loginForm"
-          layout="vertical"
-          onFinish={onFinish}
-          requiredMark={false}
-          size="large"
-        >
-          <Form.Item
-            name="email"
-            label="Email Address"
-            rules={[
-              { required: true, message: 'Please enter your email address' },
-              { type: 'email', message: 'Please enter a valid email address' },
-            ]}
-          >
-            <Input
-              prefix={<MailOutlined className="text-gray-400 mr-1" />}
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              { required: true, message: 'Please enter your password' },
-              { min: 6, message: 'Password must be at least 6 characters' },
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined className="text-gray-400 mr-1" />}
-              placeholder="••••••••"
-              autoComplete="current-password"
-            />
-          </Form.Item>
-
-          <Form.Item className="mt-6">
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              className="bg-blue-600 hover:bg-blue-700 h-11 font-bold rounded-xl shadow-xs"
-            >
-              Log In
-            </Button>
-          </Form.Item>
-
-          <div className="text-center mt-4 text-sm text-gray-500">
-            Don't have an account yet?{' '}
-            <Link to="/register" className="font-semibold text-blue-600 hover:underline">
-              Create an account
-            </Link>
-          </div>
-        </Form>
-      </Card>
-    </div>
+      </div>
+    </section>
   );
 };
 

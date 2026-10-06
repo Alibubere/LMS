@@ -5,11 +5,7 @@ import CourseDetails from '../components/CourseDetails';
 export const CourseDetailPage = () => {
   const { id } = useParams();
 
-  return (
-    <div className="py-2">
-      <CourseDetails courseId={id} />
-    </div>
-  );
+  return <CourseDetails courseId={id} />;
 };
 
 export default CourseDetailPage;

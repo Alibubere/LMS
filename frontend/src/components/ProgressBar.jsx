@@ -1,6 +1,5 @@
 import React from 'react';
-import { Progress, Tag } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Badge } from './ui';
 import { formatPercentage } from '../utils/formatters';
 
 export const ProgressBar = ({
@@ -14,42 +13,33 @@ export const ProgressBar = ({
   const isComplete = safePercent >= 100;
 
   return (
-    <div className="w-full space-y-1.5">
+    <div className="w-full space-y-2">
       {showDetails && (
-        <div className="flex items-center justify-between text-xs font-medium text-gray-600">
-          <div className="flex items-center space-x-1.5">
-            {isComplete ? (
-              <Tag color="success" icon={<CheckCircleOutlined />} className="m-0">
-                Completed
-              </Tag>
-            ) : (
-              <Tag color="processing" icon={<ClockCircleOutlined />} className="m-0">
-                In Progress
-              </Tag>
-            )}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={isComplete ? 'success' : 'neutral'}>
+              {isComplete ? 'Completed' : 'In Progress'}
+            </Badge>
             {totalLessons > 0 && (
-              <span className="text-gray-500">
+              <span className="text-caption text-body">
                 {completedLessons} / {totalLessons} lessons
               </span>
             )}
           </div>
-          <span className="font-bold text-gray-800">{formatPercentage(safePercent)}</span>
+          <span className="text-caption-strong text-ink">{formatPercentage(safePercent)}</span>
         </div>
       )}
 
-      <Progress
-        percent={safePercent}
-        size={size === 'small' ? 'small' : 'default'}
-        showInfo={false}
-        strokeColor={
-          isComplete
-            ? '#10b981'
-            : {
-                '0%': '#3b82f6',
-                '100%': '#6366f1',
-              }
-        }
-      />
+      <div
+        className={`progress-track ${size === 'small' ? 'h-1' : ''}`}
+        role="progressbar"
+        aria-valuenow={safePercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Course progress"
+      >
+        <div className="progress-fill" style={{ width: `${safePercent}%` }} />
+      </div>
     </div>
   );
 };

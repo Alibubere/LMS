@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Avatar, Button, Input, Tag, Popconfirm, message } from 'antd';
+import { Avatar, Button, Input, Popconfirm, message } from 'antd';
 import { UserOutlined, MessageOutlined, DeleteOutlined, SendOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { discussionApi } from '../api';
 import { formatDate } from '../utils/formatters';
 import { ROLES } from '../utils/constants';
+import { Badge } from './ui';
 
 const { TextArea } = Input;
 
@@ -59,37 +60,38 @@ export const DiscussionItem = ({
     }
   };
 
-  const roleColor =
+  const roleVariant =
     discussion.userRole === ROLES.ADMIN
-      ? 'red'
+      ? 'danger'
       : discussion.userRole === ROLES.INSTRUCTOR
-      ? 'orange'
-      : 'blue';
+      ? 'warning'
+      : 'outline';
 
   return (
-    <div className={`p-4 bg-white rounded-lg border border-gray-100 ${depth > 0 ? 'ml-6 mt-3 bg-gray-50/50' : 'mb-4 shadow-2xs'}`}>
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-2.5">
+    <div
+      className={`border border-hairline bg-canvas ${
+        depth > 0 ? 'ml-4 mt-3 border-l-2 border-l-primary p-4 sm:ml-8' : 'mb-4 p-5'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2.5">
           <Avatar
             size="small"
             src={discussion.userAvatarUrl}
             icon={!discussion.userAvatarUrl && <UserOutlined />}
-            className="bg-blue-500"
           />
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold text-gray-900">
+            <div className="flex items-center gap-2">
+              <span className="text-caption-strong text-ink">
                 {discussion.userName || 'Anonymous'}
               </span>
               {discussion.userRole && (
-                <Tag color={roleColor} className="text-[10px] py-0 px-1.5 leading-tight m-0">
+                <Badge variant={roleVariant} className="px-1.5 py-0">
                   {discussion.userRole}
-                </Tag>
+                </Badge>
               )}
             </div>
-            <span className="text-[11px] text-gray-400">
-              {formatDate(discussion.createdAt)}
-            </span>
+            <span className="text-mono-caption text-body">{formatDate(discussion.createdAt)}</span>
           </div>
         </div>
 
@@ -101,35 +103,27 @@ export const DiscussionItem = ({
             cancelText="Cancel"
             okButtonProps={{ danger: true, loading: deleting }}
           >
-            <Button
-              type="text"
-              danger
-              size="small"
-              icon={<DeleteOutlined />}
-              className="text-gray-400 hover:text-red-500"
-            />
+            <Button type="text" danger size="small" icon={<DeleteOutlined />} />
           </Popconfirm>
         )}
       </div>
 
       {discussion.title && (
-        <h4 className="font-semibold text-sm text-gray-800 mt-2 mb-1">
-          {discussion.title}
-        </h4>
+        <h4 className="mt-3 mb-1 text-body-md-strong text-ink">{discussion.title}</h4>
       )}
 
-      <p className="text-gray-700 text-xs sm:text-sm mt-1 whitespace-pre-line leading-relaxed">
+      <p className="mt-1 whitespace-pre-line text-body-md leading-relaxed text-ink">
         {discussion.content}
       </p>
 
       {isAuthenticated && depth < 2 && (
-        <div className="mt-2.5 flex items-center space-x-2">
+        <div className="mt-3 flex items-center gap-2">
           <Button
             type="link"
             size="small"
             icon={<MessageOutlined />}
             onClick={() => setShowReplyBox(!showReplyBox)}
-            className="p-0 text-xs text-blue-600 hover:text-blue-800"
+            className="px-0 text-caption text-ink underline underline-offset-4"
           >
             {showReplyBox ? 'Cancel' : 'Reply'}
           </Button>
@@ -137,15 +131,15 @@ export const DiscussionItem = ({
       )}
 
       {showReplyBox && (
-        <div className="mt-3 pl-3 border-l-2 border-blue-400">
+        <div className="mt-3 border-l-2 border-l-primary pl-4">
           <TextArea
             rows={2}
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             placeholder="Write your constructive reply..."
-            className="text-xs"
+            className="text-body-md"
           />
-          <div className="mt-2 flex justify-end space-x-2">
+          <div className="mt-2 flex justify-end gap-2">
             <Button size="small" onClick={() => setShowReplyBox(false)}>
               Cancel
             </Button>
@@ -155,7 +149,6 @@ export const DiscussionItem = ({
               icon={<SendOutlined />}
               loading={submittingReply}
               onClick={handleSendReply}
-              className="bg-blue-600"
             >
               Post Reply
             </Button>

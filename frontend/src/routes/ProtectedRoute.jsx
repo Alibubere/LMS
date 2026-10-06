@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { Result, Button } from 'antd';
+import { Button } from 'antd';
 import { useAuth } from '../hooks/useAuth';
 import LoadingState from '../components/common/LoadingState';
 
@@ -18,21 +18,25 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center p-6">
-        <Result
-          status="403"
-          title="Access Restricted"
-          subTitle={`Your account role (${role}) is not authorized to access this resource.`}
-          extra={
-            <Button
-              type="primary"
-              onClick={() => (window.location.href = '/')}
-              className="bg-blue-600"
-            >
-              Return to Safety
-            </Button>
-          }
-        />
+      <div className="flex min-h-[50vh] items-center justify-center p-6">
+        <div className="card w-full max-w-lg">
+          <div className="card-pad-lg text-center">
+            <p className="eyebrow">Error 403</p>
+            <h1 className="mt-4 text-display-lg text-ink">Access Restricted</h1>
+            <p className="mt-4 text-body-md text-body">
+              Your account role ({role}) is not authorized to access this resource.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => (window.location.href = '/')}
+              >
+                Return to Safety
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

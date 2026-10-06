@@ -13,6 +13,7 @@ export const EnrollmentButton = ({
   size = 'middle',
   className = '',
   showDropOption = false,
+  onDark = false,
 }) => {
   const { isAuthenticated, role, user } = useAuth();
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export const EnrollmentButton = ({
           icon={<PlayCircleOutlined />}
           size={size}
           onClick={handleContinue}
-          className="bg-emerald-600 hover:bg-emerald-700"
+          className={onDark ? 'btn-mint' : ''}
         >
           Continue Learning
         </Button>
@@ -107,7 +108,7 @@ export const EnrollmentButton = ({
       size={size}
       loading={loading}
       onClick={handleEnroll}
-      className={`bg-blue-600 hover:bg-blue-700 ${className}`}
+      className={`${onDark ? 'btn-mint' : ''} ${className}`.trim()}
     >
       Enroll Now
     </Button>

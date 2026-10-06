@@ -1,50 +1,96 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Drawer } from 'antd';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import { useAuth } from '../hooks/useAuth';
+import { Button } from 'antd';
+
+const PUBLIC_LINKS = [
+  { to: '/courses', label: 'Explore Courses' },
+  { to: '/learner', label: 'Learner Dashboard' },
+  { to: '/instructor', label: 'Instructor Hub' },
+  { to: '/admin', label: 'Platform Command' },
+];
 
 export const AppShell = ({ children, showSidebar = true }) => {
   const { isAuthenticated } = useAuth();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const location = useLocation();
 
   const shouldRenderSidebar = isAuthenticated && showSidebar;
+  const closeDrawer = () => setMobileDrawerOpen(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
-      <Navbar onToggleSidebar={() => setMobileDrawerOpen(true)} />
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <Navbar onToggleMenu={() => setMobileDrawerOpen(true)} />
 
-      {/* Mobile Drawer */}
-      {shouldRenderSidebar && (
-        <Drawer
-          placement="left"
-          onClose={() => setMobileDrawerOpen(false)}
-          open={mobileDrawerOpen}
-          styles={{ body: { padding: 0 } }}
-          width={280}
-        >
-          <Sidebar onClose={() => setMobileDrawerOpen(false)} />
-        </Drawer>
-      )}
+      {/* Mobile navigation drawer */}
+      <Drawer
+        placement="left"
+        onClose={closeDrawer}
+        open={mobileDrawerOpen}
+        title={<span className="eyebrow m-0">Menu</span>}
+        styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid #ebebeb' } }}
+        width={320}
+        destroyOnClose
+      >
+        {shouldRenderSidebar ? (
+          <Sidebar onClose={closeDrawer} />
+        ) : (
+          <div className="flex flex-col gap-6 p-6">
+            <nav className="flex flex-col gap-1" aria-label="Primary">
+              {PUBLIC_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={closeDrawer}
+                  className={`flex min-h-[44px] items-center rounded-sm px-3 py-2.5 text-body-md transition-colors ${
+                    location.pathname === link.to
+                      ? 'bg-hairline font-medium text-ink'
+                      : 'text-body hover:bg-hairline hover:text-ink'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
 
-      {/* Main layout container */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto">
+            <div className="flex flex-col gap-3 border-t border-hairline pt-6">
+              <Link to="/login" onClick={closeDrawer}>
+                <Button type="default" block>
+                  Sign in
+                </Button>
+              </Link>
+              <Link to="/register" onClick={closeDrawer}>
+                <Button type="primary" block>
+                  Get started
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+      </Drawer>
+
+      {/* Main layout */}
+      <div
+        className={`mx-auto flex w-full max-w-app flex-1 ${
+          shouldRenderSidebar ? 'has-sidebar' : ''
+        }`}
+      >
         {shouldRenderSidebar && (
-          <div className="hidden lg:block shrink-0">
+          <div className="hidden shrink-0 lg:block">
             <Sidebar />
           </div>
         )}
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden min-w-0">
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-10">
           {children}
         </main>
       </div>
 
-      <footer className="bg-white border-t border-gray-200 py-6 text-center text-xs text-gray-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p>© 2026 Learning Management System. Built for learners, instructors, and administrators.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

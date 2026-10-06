@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Rate, Input, Button, Form, message, Avatar, Progress } from 'antd';
+import { Rate, Input, Button, Form, message, Avatar, Progress } from 'antd';
 import { UserOutlined, StarFilled } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { feedbackApi } from '../api';
@@ -83,69 +83,80 @@ export const FeedbackForm = ({ courseId, isEnrolled = false }) => {
   return (
     <div className="space-y-6">
       {/* Rating summary */}
-      <Card className="rounded-xl border-gray-200">
-        <div className="flex flex-col sm:flex-row items-center sm:space-x-8 text-center sm:text-left">
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-extrabold text-gray-900">{avgRating || '—'}</span>
-            <Rate disabled allowHalf value={Number(avgRating) || 0} className="text-yellow-400 text-sm mt-1" />
-            <span className="text-xs text-gray-400 mt-1">
+      <div className="card">
+        <div className="card-pad-lg flex flex-col items-center gap-6 text-center sm:flex-row sm:gap-8 sm:text-left">
+          <div className="flex shrink-0 flex-col items-center">
+            <span className="text-display-xl text-ink">{avgRating || '—'}</span>
+            <Rate disabled allowHalf value={Number(avgRating) || 0} className="mt-1" />
+            <span className="mt-1 text-caption text-body">
               Based on {feedbacks.length} {feedbacks.length === 1 ? 'review' : 'reviews'}
             </span>
           </div>
 
           {/* Star breakdown */}
-          <div className="flex-1 w-full mt-4 sm:mt-0 space-y-1">
+          <div className="w-full flex-1 space-y-1">
             {[5, 4, 3, 2, 1].map((stars) => {
               const count = feedbacks.filter((f) => f.rating === stars).length;
               const pct = feedbacks.length > 0 ? (count / feedbacks.length) * 100 : 0;
               return (
-                <div key={stars} className="flex items-center space-x-2 text-xs text-gray-500">
-                  <span className="w-12 text-right">{stars} stars</span>
-                  <Progress percent={Math.round(pct)} size="small" showInfo={false} strokeColor="#f59e0b" className="flex-1 m-0" />
-                  <span className="w-6 text-gray-400 text-right">{count}</span>
+                <div key={stars} className="flex items-center gap-2 text-caption text-body">
+                  <span className="w-14 shrink-0 text-right">{stars} stars</span>
+                  <Progress
+                    percent={Math.round(pct)}
+                    size="small"
+                    showInfo={false}
+                    strokeColor="#000000"
+                    className="m-0 flex-1"
+                  />
+                  <span className="w-6 text-right text-ink">{count}</span>
                 </div>
               );
             })}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Submit / Edit review for enrolled learners */}
       {isAuthenticated && isEnrolled && (
-        <Card className="rounded-xl border-blue-200 bg-blue-50/20">
-          <h4 className="font-semibold text-sm text-gray-800 mb-2">
-            {userFeedback ? 'Edit Your Review' : 'Leave Course Feedback'}
-          </h4>
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Form.Item
-              name="rating"
-              label="Rating"
-              rules={[{ required: true, message: 'Please select a star rating' }]}
-              initialValue={5}
-            >
-              <Rate className="text-yellow-400" />
-            </Form.Item>
+        <div className="card">
+          <div className="card-pad-lg">
+            <p className="eyebrow">
+              {userFeedback ? 'Edit your review' : 'Leave course feedback'}
+            </p>
+            <Form form={form} layout="vertical" onFinish={handleSubmit} className="mt-4">
+              <Form.Item
+                name="rating"
+                label="Rating"
+                rules={[{ required: true, message: 'Please select a star rating' }]}
+                initialValue={5}
+              >
+                <Rate />
+              </Form.Item>
 
-            <Form.Item
-              name="comment"
-              label="Your Review"
-              rules={[{ required: true, message: 'Please write a brief comment' }]}
-            >
-              <TextArea rows={3} placeholder="What did you think of the course content, lessons, and assignments?" />
-            </Form.Item>
+              <Form.Item
+                name="comment"
+                label="Your Review"
+                rules={[{ required: true, message: 'Please write a brief comment' }]}
+              >
+                <TextArea
+                  rows={3}
+                  placeholder="What did you think of the course content, lessons, and assignments?"
+                />
+              </Form.Item>
 
-            <div className="flex justify-end">
-              <Button type="primary" htmlType="submit" loading={submitting} className="bg-blue-600">
-                {userFeedback ? 'Update Review' : 'Submit Review'}
-              </Button>
-            </div>
-          </Form>
-        </Card>
+              <div className="flex justify-end">
+                <Button type="primary" htmlType="submit" loading={submitting}>
+                  {userFeedback ? 'Update Review' : 'Submit Review'}
+                </Button>
+              </div>
+            </Form>
+          </div>
+        </div>
       )}
 
       {/* Review List */}
       <div className="space-y-3">
-        <h4 className="font-bold text-sm text-gray-800">Learner Reviews</h4>
+        <p className="eyebrow">Learner reviews</p>
 
         {loading && <LoadingState tip="Loading feedback..." />}
 
@@ -160,25 +171,24 @@ export const FeedbackForm = ({ courseId, isEnrolled = false }) => {
         {!loading && !error && feedbacks.length > 0 && (
           <div className="space-y-3">
             {feedbacks.map((f) => (
-              <div key={f.id} className="p-4 bg-white rounded-xl border border-gray-100 shadow-2xs">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
+              <div key={f.id} className="border border-hairline bg-canvas p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
                     <Avatar
                       size="small"
                       src={f.userAvatarUrl}
                       icon={!f.userAvatarUrl && <UserOutlined />}
-                      className="bg-indigo-500"
                     />
                     <div>
-                      <span className="text-xs font-semibold text-gray-800 block">
+                      <span className="block text-caption-strong text-ink">
                         {f.userName || 'Learner'}
                       </span>
-                      <span className="text-[11px] text-gray-400">{formatDate(f.createdAt)}</span>
+                      <span className="text-mono-caption text-body">{formatDate(f.createdAt)}</span>
                     </div>
                   </div>
-                  <Rate disabled value={f.rating} className="text-yellow-400 text-xs" />
+                  <Rate disabled value={f.rating} className="text-caption" />
                 </div>
-                <p className="text-gray-700 text-xs sm:text-sm whitespace-pre-line leading-relaxed">
+                <p className="whitespace-pre-line text-body-md leading-relaxed text-ink">
                   {f.comment}
                 </p>
               </div>

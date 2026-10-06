@@ -102,6 +102,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                 <configuration>
+                    <!-- Replace with your actual package structure and class name -->
+                    <mainClass>com.example.LmsApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
